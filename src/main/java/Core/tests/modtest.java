@@ -1,4 +1,5 @@
-import API.module;
+package Core.tests;
+import API.moduleImpl;
 import API.moduleInfo;
 
 import Core.bash;
@@ -7,7 +8,7 @@ import Core.messaging.msh;
 /** @author uis */
 
 @moduleInfo(name = "test", internalName = "test", author="uis")
-public class modtest implements module {
+public class modtest extends moduleImpl{
 	@Override
 	public void enablePlugin() {
 		System.out.println("testOnEnable");

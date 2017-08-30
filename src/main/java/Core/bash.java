@@ -45,7 +45,7 @@ public class bash extends Thread{
 			//log.
 //			String cmd;
 			while(true){
-				System.out.print("root@VKBot#");
+				System.out.print(user+"@"+host+"#");
 				cmd=br.readLine();
 				if(cmd.equals("")){}else if(command("test")){
 					System.out.println("Successful");
