@@ -2,6 +2,7 @@ package Core;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,7 @@ import com.vk.api.sdk.client.actors.UserActor;
 
 import API.module;
 import API.moduleInfo;
-@moduleInfo(dependencies="",name="VK Burn Again Shell",version=Core.version.CoreVersion,build=Core.version.CoreBuild)
+@moduleInfo(author="uis",dependencies="",internalName="bash",name="Burn Again Shell",version=Core.version.CoreVersion,build=Core.version.CoreBuild)
 public class bash extends Thread{
 	modprobe p;
 	BufferedReader br=null;
@@ -34,6 +35,7 @@ public class bash extends Thread{
 	}
 	boolean isUser=false;
 	module m;
+	HashMap<String,module> hm=new HashMap<String,module>();
 	String user="root";
 	String host="VKBot";
 	@Override
@@ -56,11 +58,19 @@ public class bash extends Thread{
 					System.out.println(bash.class.getAnnotation(moduleInfo.class).name());
 				}else if(command("modprobe")){
 					m=new modprobe().load(cmd.split(" ")[1]);
-					m.enablePlugin();
-					continue;
-				}else if(cmd.startsWith("exec")){
+//					if(!hm.containsKey(m.getClass().getAnnotation(moduleInfo.class).internalName())){
+						System.out.println(hm.containsKey(m.getClass().getAnnotation(moduleInfo.class).internalName()));
+						log.debug("Loading module "+m.getClass().getAnnotation(moduleInfo.class).name());
+						m.onLoad();
+						log.info("Module "+m.getClass().getAnnotation(moduleInfo.class).name()+" loaded");
+						m.enablePlugin();
+						hm.put(m.getClass().getAnnotation(moduleInfo.class).internalName(), m);
+//					}else{
+						log.error("Mudule aleready loaded");
+//					}
+				}else if(cmd.startsWith("exec ")){
 					String sum="";
-					BufferedReader r=new BufferedReader(new InputStreamReader(Runtime.getRuntime().exec(cmd.replaceFirst("exec", "")).getInputStream()));
+					BufferedReader r=new BufferedReader(new InputStreamReader(Runtime.getRuntime().exec(cmd.replaceFirst("exec ", "")).getInputStream()));
 				    while (true)
 				    {
 				        String str=r.readLine();
