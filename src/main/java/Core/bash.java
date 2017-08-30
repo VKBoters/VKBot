@@ -39,12 +39,13 @@ public class bash extends Thread{
 	HashMap<String,module> loaded=new HashMap<String,module>();
 	String user="root";
 	String host="VKBot";
+	@SuppressWarnings("static-access")
 	@Override
 	public void run(){
-		try{
 			//log.
 //			String cmd;
-			while(true){
+		while(true){
+			try{
 				System.out.print(user+"@"+host+"#");
 				cmd=br.readLine();
 				if(cmd.equals("")){}else if(command("test")){
@@ -81,13 +82,15 @@ public class bash extends Thread{
 				        sum+=str+"\n";
 				    }
 				    System.out.println(sum);
+				}else if(cmd.contains(":")&&cmd.startsWith(cmd.split(":")[0]+":")&&hm.containsKey(cmd.split(":")[0])){
+					System.out.println(hm.get(cmd.split(":")[0]).commands.get(cmd.split(":")[1]).exec(cmd.replaceFirst(cmd.split(" ")[0]+" ", "")));
 				}else{
 					System.out.println(cmd.split(" ")[0]+": command not found");
 				}
+			}catch(Exception e){
+//				System.out.println(e.toString());
+				e.printStackTrace();
 			}
-		}catch(Exception e){
-//			System.out.println(e.toString());
-			e.printStackTrace();
 		}
 	}
 	protected boolean command(String what){

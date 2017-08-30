@@ -1,14 +1,16 @@
 package Core.tests;
-import API.moduleImpl;
+import API.Command;
+import API.module;
 import API.moduleInfo;
 
 import Core.bash;
 import Core.messaging.msh;
+import Core.tests.commands.testmsg;
 
 /** @author uis */
 
 @moduleInfo(name = "test", internalName = "test", author="uis")
-public class modtest extends moduleImpl{
+public class modtest implements module{
 	@Override
 	public void enablePlugin() {
 		System.out.println("testOnEnable");
@@ -31,5 +33,13 @@ public class modtest extends moduleImpl{
 	@Override
 	public void onLoad() {
 		System.out.println("testOnLoad");
+		try {
+			modtest.registerCommand("testmsg", (Command)testmsg.class.newInstance());
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+	}
+	private static void registerCommand(String string, Command newInstance) {
+		commands.put(string, newInstance);
 	}
 }

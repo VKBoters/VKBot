@@ -1,5 +1,5 @@
 package API;
 
-public abstract class Command {
+public interface Command {
 	public abstract String exec(String args);
 }

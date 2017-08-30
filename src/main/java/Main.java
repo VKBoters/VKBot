@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 import Core.bash;
@@ -23,8 +24,11 @@ public class Main{
 	public static void main(String[] args) {
 		try {
 			new Main();
+//			test();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+//	private static void test(){
+//	}
 }
