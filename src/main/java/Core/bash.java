@@ -1,6 +1,10 @@
 package Core;
 
 import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vk.api.sdk.client.actors.GroupActor;
 import com.vk.api.sdk.client.actors.UserActor;
@@ -16,6 +20,7 @@ public class bash extends Thread{
 	}
 	public bash() {
 	}
+	Logger log=LoggerFactory.getLogger("main");
 	String cmd;
 	UserActor u;
 	GroupActor g;
@@ -28,10 +33,13 @@ public class bash extends Thread{
 		this.g=g;
 	}
 	boolean isUser=false;
-	module[] m;
+	module m;
+	String user="root";
+	String host="VKBot";
 	@Override
 	public void run(){
 		try{
+			//log.
 //			String cmd;
 			while(true){
 				System.out.print("root@VKBot#");
@@ -47,14 +55,27 @@ public class bash extends Thread{
 				}else if(command("whatisit")){
 					System.out.println(bash.class.getAnnotation(moduleInfo.class).name());
 				}else if(command("modprobe")){
-//					URL[] u=new URL[1];
-//					u[0]=new URL(cmd.split(" ")[1]);
-					m[0]=new modprobe(this.getContextClassLoader()/*,u*/).load(cmd.split(" ")[1]);
+					m=new modprobe().load(cmd.split(" ")[1]);
+					m.enablePlugin();
+					continue;
+				}else if(cmd.startsWith("exec")){
+					String sum="";
+					BufferedReader r=new BufferedReader(new InputStreamReader(Runtime.getRuntime().exec(cmd.replaceFirst("exec", "")).getInputStream()));
+				    while (true)
+				    {
+				        String str=r.readLine();
+				        if(str==null){
+				        	break;
+				        }
+				        sum+=str+"\n";
+				    }
+				    System.out.println(sum);
 				}else{
 					System.out.println(cmd.split(" ")[0]+": command not found");
 				}
 			}
 		}catch(Exception e){
+//			System.out.println(e.toString());
 			e.printStackTrace();
 		}
 	}
