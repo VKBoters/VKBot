@@ -36,6 +36,7 @@ public class bash extends Thread{
 	boolean isUser=false;
 	module m;
 	HashMap<String,module> hm=new HashMap<String,module>();
+	HashMap<String,module> loaded=new HashMap<String,module>();
 	String user="root";
 	String host="VKBot";
 	@Override
@@ -58,16 +59,16 @@ public class bash extends Thread{
 					System.out.println(bash.class.getAnnotation(moduleInfo.class).name());
 				}else if(command("modprobe")){
 					m=new modprobe().load(cmd.split(" ")[1]);
-//					if(!hm.containsKey(m.getClass().getAnnotation(moduleInfo.class).internalName())){
-						System.out.println(hm.containsKey(m.getClass().getAnnotation(moduleInfo.class).internalName()));
-						log.debug("Loading module "+m.getClass().getAnnotation(moduleInfo.class).name());
+					if(!hm.containsKey(m.getClass().getAnnotation(moduleInfo.class).internalName())){
+//						System.out.println(loaded.containsKey(m.getClass().getAnnotation(moduleInfo.class).internalName()));
+						log.debug("Loading module \""+m.getClass().getAnnotation(moduleInfo.class).name()+"\"");
 						m.onLoad();
-						log.info("Module "+m.getClass().getAnnotation(moduleInfo.class).name()+" loaded");
+						log.info("Module \""+m.getClass().getAnnotation(moduleInfo.class).name()+"\" loaded");
 						m.enablePlugin();
 						hm.put(m.getClass().getAnnotation(moduleInfo.class).internalName(), m);
-//					}else{
+					}else{
 						log.error("Mudule aleready loaded");
-//					}
+					}
 				}else if(cmd.startsWith("exec ")){
 					String sum="";
 					BufferedReader r=new BufferedReader(new InputStreamReader(Runtime.getRuntime().exec(cmd.replaceFirst("exec ", "")).getInputStream()));
