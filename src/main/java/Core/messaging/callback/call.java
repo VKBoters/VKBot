@@ -5,6 +5,8 @@ import java.io.IOException;
 import com.vk.api.sdk.callback.CallbackApi;
 import com.vk.api.sdk.objects.messages.Message;
 
+import Core.messaging.parser;
+
 public class call extends CallbackApi{
 	@Override
 	public void messageNew(Integer id, Message message){
