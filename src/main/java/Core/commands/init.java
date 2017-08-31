@@ -11,6 +11,7 @@ import Core.bash;
 import Core.messaging.msh;
 
 public class init/* implements bash.Callback*/{
+	@SuppressWarnings("unused")
 	public static void exec(String[] args,bash bash) throws Exception {
 		UserActor u;
 		GroupActor g;
@@ -18,11 +19,9 @@ public class init/* implements bash.Callback*/{
 			if(args[1].equals("user")){
 				g=null;
 				u=new UserActor(getId(),get());
-				bash.setUserActor(u);
 			}else if(args[1].equals("group")){
 				u=null;
 				g=new GroupActor(getId(),get());
-				bash.setGroupActor(g);
 			}else{
 				System.out.println("init: fatal error: "+args[1]+" does not exist!");
 			}

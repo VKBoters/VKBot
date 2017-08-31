@@ -7,9 +7,6 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vk.api.sdk.client.actors.GroupActor;
-import com.vk.api.sdk.client.actors.UserActor;
-
 import API.module;
 import API.moduleInfo;
 @moduleInfo(author="uis",dependencies="",internalName="bash",name="Burn Again Shell",version=Core.version.CoreVersion,build=Core.version.CoreBuild)
@@ -23,18 +20,8 @@ public class bash extends Thread{
 	}
 	Logger log=LoggerFactory.getLogger("main");
 	String cmd;
-	UserActor u;
-	GroupActor g;
-	public void setUserActor(UserActor u){
-		isUser=true;
-		this.u=u;
-	}
-	public void setGroupActor(GroupActor g){
-		isUser=false;
-		this.g=g;
-	}
 	boolean isUser=false;
-	module m;
+	Class<?> m;
 	HashMap<String,module> hm=new HashMap<String,module>();
 	HashMap<String,module> loaded=new HashMap<String,module>();
 	String user="root";
@@ -61,12 +48,12 @@ public class bash extends Thread{
 				}else if(command("modprobe")){
 					m=new modprobe().load(cmd.split(" ")[1]);
 					if(!hm.containsKey(m.getClass().getAnnotation(moduleInfo.class).internalName())){
-//						System.out.println(loaded.containsKey(m.getClass().getAnnotation(moduleInfo.class).internalName()));
+						module tmp=(module) m.newInstance();
 						log.debug("Loading module \""+m.getClass().getAnnotation(moduleInfo.class).name()+"\"");
-						m.onLoad();
+						tmp.onLoad();
 						log.info("Module \""+m.getClass().getAnnotation(moduleInfo.class).name()+"\" loaded");
-						m.enablePlugin();
-						hm.put(m.getClass().getAnnotation(moduleInfo.class).internalName(), m);
+						tmp.enablePlugin();
+						hm.put(m.getClass().getAnnotation(moduleInfo.class).internalName(), tmp);
 					}else{
 						log.error("Mudule aleready loaded");
 					}
@@ -83,7 +70,11 @@ public class bash extends Thread{
 				    }
 				    System.out.println(sum);
 				}else if(cmd.contains(":")&&cmd.startsWith(cmd.split(":")[0]+":")&&hm.containsKey(cmd.split(":")[0])){
-					System.out.println(hm.get(cmd.split(":")[0]).commands.get(cmd.split(":")[1]).exec(cmd.replaceFirst(cmd.split(" ")[0]+" ", "")));
+					if(hm.get(cmd.split(":")[0]).commands.containsKey(cmd.split(":")[1])){
+						System.out.println(hm.get(cmd.split(":")[0]).commands.get(cmd.split(":")[1]).exec(cmd.replaceFirst(cmd.split(" ")[0]+" ", "")));
+					}else{
+						System.out.println("Module \""+cmd.split(":")[0]+"\" doesn't contains command \""+cmd.split(":")[1]+"\"");
+					}
 				}else{
 					System.out.println(cmd.split(" ")[0]+": command not found");
 				}
