@@ -7,11 +7,11 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import API.Command;
 import API.module;
 import API.moduleInfo;
 @moduleInfo(author="uis",dependencies="",internalName="bash",name="Burn Again Shell",version=Core.version.CoreVersion,build=Core.version.CoreBuild)
 public class bash extends Thread{
-	modprobe p;
 	BufferedReader br=null;
 	public bash(BufferedReader reader) {
 		br=reader;
@@ -22,10 +22,12 @@ public class bash extends Thread{
 	String cmd;
 	boolean isUser=false;
 	Class<?> m;
-	HashMap<String,module> hm=new HashMap<String,module>();
+	HashMap<String,Command> aliases=new HashMap<String, Command>();
+	HashMap<String,module> enabled=new HashMap<String,module>();
 	HashMap<String,module> loaded=new HashMap<String,module>();
 	String user="root";
 	String host="VKBot";
+	module tmp;
 	@SuppressWarnings("static-access")
 	@Override
 	public void run(){
@@ -45,17 +47,22 @@ public class bash extends Thread{
 					Core.commands.init.exec(cmd.split(" "), this);
 				}else if(command("whatisit")){
 					System.out.println(bash.class.getAnnotation(moduleInfo.class).name());
-				}else if(command("modprobe")){
-					m=new modprobe().load(cmd.split(" ")[1]);
-					if(!hm.containsKey(m.getClass().getAnnotation(moduleInfo.class).internalName())){
-						module tmp=(module) m.newInstance();
-						log.debug("Loading module \""+m.getClass().getAnnotation(moduleInfo.class).name()+"\"");
-						tmp.onLoad();
-						log.info("Module \""+m.getClass().getAnnotation(moduleInfo.class).name()+"\" loaded");
-						tmp.enablePlugin();
-						hm.put(m.getClass().getAnnotation(moduleInfo.class).internalName(), tmp);
+				}else if(cmd.startsWith("modprobe")){
+					if(cmd.split(" ").length==2){
+						m=new modprobe().load(cmd.split(" ")[1]);
+						tmp=(module) m.newInstance();
+						if(!enabled.containsKey(tmp.getClass().getAnnotation(moduleInfo.class).internalName())){
+//							module tmp=(module) m.newInstance();
+							log.debug("Loading module \""+tmp.getClass().getAnnotation(moduleInfo.class).name()+"\"");
+							tmp.onLoad();
+							log.info("Module \""+tmp.getClass().getAnnotation(moduleInfo.class).name()+"\" loaded");
+							tmp.enablePlugin();
+							enabled.put(tmp.getClass().getAnnotation(moduleInfo.class).internalName(), tmp);
+						}else{
+							log.error("Mudule aleready loaded");
+						}
 					}else{
-						log.error("Mudule aleready loaded");
+						System.out.println("Usage: modprobe [class]");
 					}
 				}else if(cmd.startsWith("exec ")){
 					String sum="";
@@ -69,12 +76,26 @@ public class bash extends Thread{
 				        sum+=str+"\n";
 				    }
 				    System.out.println(sum);
-				}else if(cmd.contains(":")&&cmd.startsWith(cmd.split(":")[0]+":")&&hm.containsKey(cmd.split(":")[0])){
-					if(hm.get(cmd.split(":")[0]).commands.containsKey(cmd.split(":")[1])){
-						System.out.println(hm.get(cmd.split(":")[0]).commands.get(cmd.split(":")[1]).exec(cmd.replaceFirst(cmd.split(" ")[0]+" ", "")));
+				}else if(cmd.contains(":")&&cmd.startsWith(cmd.split(":")[0]+":")&&enabled.containsKey(cmd.split(":")[0])){
+					if(enabled.get(cmd.split(":")[0]).commands.containsKey(cmd.split(":")[1])){
+						System.out.println(enabled.get(cmd.split(":")[0]).commands.get(cmd.split(":")[1]).exec(cmd.replaceFirst(cmd.split(" ")[0]+" ", "")));
 					}else{
 						System.out.println("Module \""+cmd.split(":")[0]+"\" doesn't contains command \""+cmd.split(":")[1]+"\"");
 					}
+				}else if(cmd.startsWith("addAlias")){
+					if(cmd.split(" ").length==3){
+						aliases.put(cmd.split(" ")[1], enabled.get(cmd.split(" ")[2].split(":")[0]).commands.get(cmd.split(" ")[2].split(":")[1]));
+					}else{
+						System.out.println("Usage: addAlias [alias] [command]");
+					}
+				}else if(cmd.startsWith("delAlias")){
+					if(cmd.split(" ").length==2){
+						aliases.remove(cmd.split(" ")[1]);
+					}else{
+						System.out.println("Usage: delAlias [alias]");
+					}
+				}else if(aliases.containsKey(cmd.split(" ")[0])){
+					System.out.println(aliases.get(cmd.split(" ")[0]).exec(cmd.replaceFirst(cmd.split(" ")[0]+" ", "")));
 				}else{
 					System.out.println(cmd.split(" ")[0]+": command not found");
 				}
