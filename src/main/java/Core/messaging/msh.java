@@ -14,8 +14,8 @@ import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
 import com.vk.api.sdk.objects.messages.LongpollParams;
 import com.vk.api.sdk.objects.polls.Answer;
-import com.vk.api.sdk.streaming.clients.VkStreamingApiClient;
 
+import API.Command;
 import API.module;
 import API.moduleInfo;
 
@@ -23,12 +23,14 @@ import API.moduleInfo;
 @moduleInfo(author="uis",internalName="msh",name="Message Shell",version=Core.version.CoreVersion,build=Core.version.CoreBuild)
 public class msh extends Thread{
 	TransportClient tc=new HttpTransportClient();
-	VkApiClient c=new VkApiClient(tc);
-	VkStreamingApiClient sc=new VkStreamingApiClient(tc);
+	public VkApiClient c=new VkApiClient(tc);
+//	VkStreamingApiClient sc=new VkStreamingApiClient(tc);
 	UserActor act;
-	HashMap<String,module> enabled=new HashMap<String,module>();
+	public HashMap<String,module> loaded=new HashMap<String,module>();
+	public HashMap<String,module> enabled=new HashMap<String,module>();
+	public HashMap<String,Command> aliases=new HashMap<String, Command>();
 	LongpollParams lpp;
-	public msh(){
+	public void mshInit(){
 		try {
 			lpp=c.messages().getLongPollServer(act).lpVersion(4).execute();
 		} catch (ApiException | ClientException e) {
