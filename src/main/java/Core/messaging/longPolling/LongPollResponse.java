@@ -1,8 +1,10 @@
 package Core.messaging.longPolling;
 
-import com.google.gson.JsonArray;
+import com.google.gson.annotations.SerializedName;
 
 public class LongPollResponse {
+	@SerializedName("ts")
 	public int ts;
-	public JsonArray updates;
+	@SerializedName("updates")
+	public Object[][] updates;
 }

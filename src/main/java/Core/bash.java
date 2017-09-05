@@ -2,12 +2,10 @@ package Core;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import API.Command;
 import API.module;
 import API.moduleInfo;
 import Core.messaging.msh;
@@ -47,6 +45,16 @@ public class bash extends Thread{
 					break;
 				}else if(command("init")){
 					Core.commands.init.exec(cmd.split(" "), this);
+				}else if(command("mshInit")){
+					if(cmd.split(" ").length==3){
+						MSH.mshInit(Integer.parseInt(cmd.split(" ")[1]), cmd.split(" ")[2]);
+					}else{
+						System.out.println("Usage: mshInit [id] [token]");
+					}
+				}else if(command("mshStart")){
+					MSH.start();
+				}else if(command("mshStop")){
+					MSH.stop();
 				}else if(command("whatisit")){
 					System.out.println(bash.class.getAnnotation(moduleInfo.class).name());
 				}else if(cmd.startsWith("modprobe")){

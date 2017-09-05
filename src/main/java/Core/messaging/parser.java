@@ -29,7 +29,7 @@ public class parser {
 		String sum="";
 //		String ins;
 		if(what.startsWith("/")){
-			return new msh().userCmd(what.replace("/", ""));
+//			return new msh().userCmd(what.replace("/", ""));
 		} else if(what.startsWith("#")){
 			Process i=Runtime.getRuntime().exec(what.replaceFirst("#", ""));
 			BufferedReader r=new BufferedReader(new InputStreamReader(i.getInputStream()));
