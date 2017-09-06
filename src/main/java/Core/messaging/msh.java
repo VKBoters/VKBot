@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -23,7 +20,7 @@ import com.vk.api.sdk.objects.messages.LongpollParams;
 import API.Command;
 import API.module;
 import API.moduleInfo;
-import Core.messaging.longPolling.LongPollResponse;
+
 /** @author uis */
 @moduleInfo(author="uis",internalName="msh",name="Message Shell",version=Core.version.CoreVersion,build=Core.version.CoreBuild)
 public class msh extends Thread{
@@ -69,48 +66,42 @@ public class msh extends Thread{
 			
 		}
 	}
-//	Answer a;
-	Logger l=LoggerFactory.getLogger(msh.class);
 	public void run(){
 		int ts=lpp.getTs();
 		String key=lpp.getKey();
 		String server=lpp.getServer();
 		Gson gson=c.getGson();
 		JsonObject r;
-		LongPollResponse lpr;
-//		Message m;
 		ClientResponse resp;
+		Object[][] o;
+		Object[] tmp;
 		while(true){
 			try {
-			resp=tc.get("https://"+server+"?act=a_check&key="+key+"&ts="+ts+"&wait=90&version=2");
-			System.out.println(resp.getContent());
-			r=(JsonObject) new JsonParser().parse(new JsonReader(new StringReader(resp.getContent())));
-			if(r.has("failed")){
-//				LongPollFailed f;
-//				f=gson.fromJson(r.get("failed"), LongPollFailed.class);
-				l.error("Longpoll failed"+gson.fromJson(r.get("failed"), Object.class));
-			}
-			ts=gson.fromJson(r.get("ts"), int.class);
-//			lpr=gson.fromJson(r.get("updates"), LongPollResponse.class);
-//				r.
-//				lpr=gson.fromJson(resp.getContent(),LongPollResponse.class);
-//				if(lpr.updates.length!=0&&lpr.updates!=null){
-//					if(lpr.updates[0]==(Object)4){
-////						parse((int)lpr.updates[1]);
-//					}
-//				}
-//				jo.
-//				ts=jo.getInt("ts");
-//				r.updates.
-			} catch (IOException e) {
+				resp=tc.get("https://"+server+"?act=a_check&key="+key+"&ts="+ts+"&wait=90&version=2");
+				System.out.println(resp.getContent());
+				r=(JsonObject) new JsonParser().parse(new JsonReader(new StringReader(resp.getContent())));
+				if(r.has("failed")){
+					System.err.println(gson.fromJson(r.get("failed"), Object.class));
+	//				l.error("Longpoll failed"+gson.fromJson(r.get("failed"), Object.class));
+				}
+				ts=gson.fromJson(r.get("ts"), int.class);
+				o=gson.fromJson(r.get("updates"), Object[][].class);
+				for(int i=0; i<o.length; i++){
+					tmp=o[i];
+					if((double)tmp[0]==4){
+	//					System.out.println(tmp[0]+" "+((Double)tmp[3]).intValue()+" "+tmp[5]);
+						userCmd((String)tmp[5],((Double)tmp[3]).intValue()/*,c.messages().getById(act, ((Double)tmp[1]).intValue()).execute().getItems().indexOf(0)*/);
+					}
+				}
+			} catch (IOException/* | ApiException | ClientException */e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	public void userCmd(String what, int id){
+	public void userCmd(String cmd, int peerId/*, int wroteBy*/){
 		try {
-			if(what.equals("ping")){
-					c.messages().send(act).chatId(id).message("pong").execute();
+			if(cmd.equals("ping")){
+					c.messages().send(act).peerId(peerId).message("pong").execute();
 //			}else if(){
 				
 			}else{
