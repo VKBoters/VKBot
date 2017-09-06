@@ -3,9 +3,6 @@ package Core;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import API.module;
 import API.moduleInfo;
 import Core.messaging.msh;
@@ -17,7 +14,6 @@ public class bash extends Thread{
 	}
 	public bash() {
 	}
-	Logger log=LoggerFactory.getLogger("main");
 	String cmd;
 	boolean isUser=false;
 	Class<?> m;
@@ -28,11 +24,9 @@ public class bash extends Thread{
 	String host="VKBot";
 	module tmp;
 	msh MSH=new msh();
-	@SuppressWarnings("static-access")
+	@SuppressWarnings({ "static-access", "deprecation" })
 	@Override
 	public void run(){
-			//log.
-//			String cmd;
 		while(true){
 			try{
 				System.out.print(user+"@"+host+"#");
@@ -62,14 +56,12 @@ public class bash extends Thread{
 						m=new modprobe().load(cmd.split(" ")[1]);
 						tmp=(module) m.newInstance();
 						if(!MSH.enabled.containsKey(tmp.getClass().getAnnotation(moduleInfo.class).internalName())){
-//							module tmp=(module) m.newInstance();
-							log.debug("Loading module \""+tmp.getClass().getAnnotation(moduleInfo.class).name()+"\"");
 							tmp.onLoad();
-							log.info("Module \""+tmp.getClass().getAnnotation(moduleInfo.class).name()+"\" loaded");
+							System.out.println("Module \""+tmp.getClass().getAnnotation(moduleInfo.class).name()+"\" loaded");
 							tmp.enablePlugin();
 							MSH.enabled.put(tmp.getClass().getAnnotation(moduleInfo.class).internalName(), tmp);
 						}else{
-							log.error("Mudule aleready loaded");
+							System.err.println("Mudule aleready loaded");
 						}
 					}else{
 						System.out.println("Usage: modprobe [class]");
