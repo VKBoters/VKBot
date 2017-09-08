@@ -16,7 +16,7 @@ public class bash extends Thread{
 	}
 	String cmd;
 	boolean isUser=false;
-	Class<?> m;
+//	Class<?> m;
 //	HashMap<String,Command> aliases=new HashMap<String, Command>();
 //	HashMap<String,module> enabled=new HashMap<String,module>();
 //	HashMap<String,module> loaded=new HashMap<String,module>();
@@ -24,7 +24,7 @@ public class bash extends Thread{
 	String host="VKBot";
 	module tmp;
 	msh MSH=new msh();
-	@SuppressWarnings({ "static-access", "deprecation" })
+	@SuppressWarnings({ "deprecation" })
 	@Override
 	public void run(){
 		while(true){
@@ -53,8 +53,8 @@ public class bash extends Thread{
 					System.out.println(bash.class.getAnnotation(moduleInfo.class).name());
 				}else if(cmd.startsWith("modprobe")){
 					if(cmd.split(" ").length==2){
-						m=new modprobe().load(cmd.split(" ")[1]);
-						tmp=(module) m.newInstance();
+						tmp=new modprobe().load(cmd.split(" ")[1]);
+//						tmp=(module) m.newInstance();
 						if(!MSH.enabled.containsKey(tmp.getClass().getAnnotation(moduleInfo.class).internalName())){
 							tmp.onLoad();
 							System.out.println("Module \""+tmp.getClass().getAnnotation(moduleInfo.class).name()+"\" loaded");
@@ -98,6 +98,9 @@ public class bash extends Thread{
 					}
 				}else if(MSH.aliases.containsKey(cmd.split(" ")[0])){
 					System.out.println(MSH.aliases.get(cmd.split(" ")[0]).exec(cmd.replaceFirst(cmd.split(" ")[0]+" ", "")));
+//				}else if(cmd.startsWith("write")){
+//					MSH.w.close();
+//					MSH.w=new PrintWriter(new File("access.log"));
 				}else{
 					System.out.println(cmd.split(" ")[0]+": command not found");
 				}

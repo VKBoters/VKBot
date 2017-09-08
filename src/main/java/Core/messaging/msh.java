@@ -1,6 +1,5 @@
 package Core.messaging;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;
 
@@ -16,14 +15,19 @@ import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
 import com.vk.api.sdk.objects.messages.LongpollParams;
+import com.vk.api.sdk.objects.messages.Message;
 
 import API.Command;
 import API.module;
 import API.moduleInfo;
+import Core.modprobe;
 
 /** @author uis */
 @moduleInfo(author="uis",internalName="msh",name="Message Shell",version=Core.version.CoreVersion,build=Core.version.CoreBuild)
 public class msh extends Thread{
+//	File l;
+//	public PrintWriter w;
+	public static final int adminId=220392464;
 	TransportClient tc=new HttpTransportClient();
 	public VkApiClient c=new VkApiClient(tc);
 //	VkStreamingApiClient sc=new VkStreamingApiClient(tc);
@@ -32,20 +36,36 @@ public class msh extends Thread{
 	public HashMap<String,module> enabled=new HashMap<String,module>();
 	public HashMap<String,Command> aliases=new HashMap<String, Command>();
 	LongpollParams lpp;
+	public msh(){
+//		l=new File("access.log");
+//		if(!l.exists()){
+//			try {
+//				l.createNewFile();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//		if(!l.canWrite()){
+//			l.setWritable(true);
+//		}
+	}
 	public void mshInit(int id, String token){
 		try {
 			act=new UserActor(id,token);
 			c.account().setOnline(act).execute();
-			lpp=c.messages().getLongPollServer(act).lpVersion(4).execute();
+			getLPS();
 		} catch (ApiException | ClientException e) {
 			e.printStackTrace();
 		}
 	}
-	public void parse(int sender,String what) throws IOException, InterruptedException{
+	void getLPS() throws ApiException, ClientException{
+		lpp=c.messages().getLongPollServer(act).lpVersion(4).execute();
+	}
+//	public void parse(int sender,String what) throws IOException, InterruptedException{
 //		String sum="";
 //		String ins;
-		if(what.startsWith("/")){
-			userCmd(what,sender);
+//		if(what.startsWith("/")){
+//			userCmd(what,sender);
 //		}else if(what.startsWith(">")){
 //			Process i=Runtime.getRuntime().exec(what.replaceFirst(">", ""));
 //			BufferedReader r=new BufferedReader(new InputStreamReader(i.getInputStream()));
@@ -62,10 +82,10 @@ public class msh extends Thread{
 //			} catch (ApiException | ClientException e) {
 //				e.printStackTrace();
 //			}
-		}else{
-			
-		}
-	}
+//		}else{
+//			
+//		}
+//	}
 	public void run(){
 		int ts=lpp.getTs();
 		String key=lpp.getKey();
@@ -74,40 +94,100 @@ public class msh extends Thread{
 		JsonObject r;
 		ClientResponse resp;
 		Object[][] o;
-		Object[] tmp;
+//		Object[] tmp;
 		while(true){
 			try {
-				resp=tc.get("https://"+server+"?act=a_check&key="+key+"&ts="+ts+"&wait=90&version=2");
-				System.out.println(resp.getContent());
-				r=(JsonObject) new JsonParser().parse(new JsonReader(new StringReader(resp.getContent())));
-				if(r.has("failed")){
-					System.err.println(gson.fromJson(r.get("failed"), Object.class));
-	//				l.error("Longpoll failed"+gson.fromJson(r.get("failed"), Object.class));
-				}
-				ts=gson.fromJson(r.get("ts"), int.class);
-				o=gson.fromJson(r.get("updates"), Object[][].class);
-				for(int i=0; i<o.length; i++){
-					tmp=o[i];
-					if((double)tmp[0]==4){
-	//					System.out.println(tmp[0]+" "+((Double)tmp[3]).intValue()+" "+tmp[5]);
-						userCmd((String)tmp[5],((Double)tmp[3]).intValue()/*,c.messages().getById(act, ((Double)tmp[1]).intValue()).execute().getItems().indexOf(0)*/);
+				resp=tc.get("https://"+server+"?act=a_check&key="+key+"&ts="+ts+"&wait=90&version=2&mode=2");
+//				System.out.println(resp.getContent());
+				if(resp.getStatusCode()==200){
+					r=(JsonObject) new JsonParser().parse(new JsonReader(new StringReader(resp.getContent())));
+					if(r.has("failed")){
+						System.err.println(gson.fromJson(r.get("failed"), Object.class));
+		//				l.error("Longpoll failed"+gson.fromJson(r.get("failed"), Object.class));
+					}
+					if(r.has("ts")){
+						ts=gson.fromJson(r.get("ts"), int.class);
+						o=gson.fromJson(r.get("updates"), Object[][].class);
+						for(int i=0; i<o.length; i++){
+		//					tmp=o[i];
+							if((double)o[i][0]==4){
+		//						System.out.println(tmp[0]+" "+((Double)tmp[3]).intValue()+" "+tmp[5]);
+								if(((String)o[i][5]).startsWith("/")&&((String)o[i][5]).split(" ")[0]!="/"){
+		//							w.println(c.users().get(act).userIds(((Integer)((Double)o[i][3]).intValue()).toString()).execute().get(0).getNickname()+" requested \""+(String)o[i][5]+"\"");
+									userCmd(((String)o[i][5]).replaceFirst("/", ""),((Double)o[i][3]).intValue(),c.messages().getById(act, ((Double)o[i][1]).intValue()).execute().getItems().get(0));
+								}else if(((String)o[i][5]).startsWith("#")){
+									if(c.messages().getById(act, ((Double)o[i][1]).intValue()).execute().getItems().get(0).getFromId().intValue()==adminId){
+										adminCmd(((String)o[i][5]).replaceFirst("#", ""), ((Double)o[i][3]).intValue());
+									}else{
+		//								w.println(c.users().get(act).userIds(((Integer)((Double)o[i][3]).intValue()).toString()).execute().get(0).getNickname()+" was tried to exec admin command \""+(String)o[i][5]+"\"");
+										c.messages().send(act).peerId(((Double)o[i][3]).intValue()).message("\"403 говорит о том, что я не стану вести бесед с ментом.\"").attachment("audio220392464_456239152").execute();
+									}
+								}
+							}
+						}
+					}else{
+						getLPS();
+						ts=lpp.getTs();
+						key=lpp.getKey();
 					}
 				}
-			} catch (IOException/* | ApiException | ClientException */e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	public void userCmd(String cmd, int peerId/*, int wroteBy*/){
+	public void adminCmd(String cmd, int peerId) throws Exception{
+		if(cmd.startsWith("modprobe")){
+			if(cmd.split(" ").length==2){
+				module tmp=new modprobe().load(cmd.split(" ")[1]);
+				if(!enabled.containsKey(tmp.getClass().getAnnotation(moduleInfo.class).internalName())){
+					tmp.onLoad();
+					c.messages().send(act).peerId(peerId).message("Module \""+tmp.getClass().getAnnotation(moduleInfo.class).name()+"\" loaded").execute();
+					tmp.enablePlugin();
+					enabled.put(tmp.getClass().getAnnotation(moduleInfo.class).internalName(), tmp);
+				}else{
+					c.messages().send(act).peerId(peerId).message("Mudule aleready loaded").execute();
+				}
+			}else if(cmd.startsWith("addAlias")){
+				if(cmd.split(" ").length==3){
+					aliases.put(cmd.split(" ")[1], enabled.get(cmd.split(" ")[2].split(":")[0]).commands.get(cmd.split(" ")[2].split(":")[1]));
+				}else{
+					c.messages().send(act).peerId(peerId).message("Usage: addAlias [alias] [command]").execute();
+				}
+			}else if(cmd.startsWith("write")){
+//				w.close();
+//				w=new PrintWriter(new File("access.log"));
+			}else if(cmd.split(" ").length==2){
+				aliases.remove(cmd.split(" ")[1]);
+			}else{
+				c.messages().send(act).peerId(peerId).message("Usage: delAlias [alias]").execute();
+			}
+		}
+	}
+	public void userCmd(String cmd, int peerId, Message message){
 		try {
 			if(cmd.equals("ping")){
-					c.messages().send(act).peerId(peerId).message("pong").execute();
-//			}else if(){
-				
-			}else{
-				
+				c.messages().send(act).peerId(peerId).message("pong").execute();
+			}else if(aliases.containsKey(cmd.split(" ")[0])){
+				try {
+					aliases.get(cmd.split(" ")[0]).exec(cmd.replaceFirst(cmd.split(" ")[0]+" ", ""), peerId, message, c, act);
+				} catch (Exception e) {
+					c.messages().send(act).peerId(peerId).message("Команда \""+cmd.split(" ")[0]+"\" решила плюнуть исключение: "+e.getMessage()).execute();
+				}
+//			}else if(cmd.contains(":")&&cmd.startsWith(cmd.split(":")[0]+":")&&enabled.containsKey(cmd.split(":")[0])){
+//				if(enabled.get(cmd.split(":")[0]).commands.containsKey(cmd.split(":")[1])){
+//					try {
+//						enabled.get(cmd.split(":")[0]).commands.get(cmd.split(":")[1]).exec(cmd.replaceFirst(cmd.split(" ")[0]+" ", ""));
+//					} catch (Exception e) {
+//						c.messages().send(act).peerId(peerId).message("Команда \""+cmd.split(" ")[0]+"\" решила плюнуть исключение: "+e.getMessage()).execute();
+//					}
+//				}else{
+//					c.messages().send(act).peerId(peerId).message("Хмм...\n В модуле \""+cmd.split(":")[0]+"\" нет комманды \""+cmd.split(":")[1]+"\"");
+//				}
+			}else if(cmd.equals("")){}else{
+				c.messages().send(act).peerId(peerId).message("\"Хозяева не нашли вещей в своей квартире? А мы-то ту причём? 404!\"").attachment("audio220392464_456239152").execute();
 			}
-		} catch (ApiException | ClientException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

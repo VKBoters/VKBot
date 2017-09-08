@@ -10,7 +10,7 @@ import Core.tests.commands.testmsg;
 /** @author uis */
 
 @moduleInfo(name = "test", internalName = "test", author="uis", version="0.1.1", build=version.CoreBuild)
-public class modtest implements module{
+public class modtest extends module{
 	byte b=2;
 	@Override
 	public void enablePlugin() {
@@ -35,12 +35,10 @@ public class modtest implements module{
 	public void onLoad() {
 		System.out.println("testOnLoad");
 		try {
-			modtest.registerCommand("testmsg", (Command)testmsg.class.newInstance());
+			registerCommand("testmsg", (Command)testmsg.class.newInstance());
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
 	}
-	private static void registerCommand(String string, Command newInstance) {
-		commands.put(string, newInstance);
-	}
+
 }
