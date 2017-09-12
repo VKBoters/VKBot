@@ -92,14 +92,21 @@ public class msh extends Thread{
 		String server=lpp.getServer();
 		Gson gson=c.getGson();
 		JsonObject r;
-		ClientResponse resp;
+		ClientResponse resp=null;
 		Object[][] o;
 //		Object[] tmp;
 		while(true){
 			try {
+				try{
 				resp=tc.get("https://"+server+"?act=a_check&key="+key+"&ts="+ts+"&wait=90&version=2&mode=2");
+				}catch(NullPointerException e){
+					getLPS();
+					ts=lpp.getTs();
+					key=lpp.getKey();
+					resp=null;
+				}
 //				System.out.println(resp.getContent());
-				if(resp.getStatusCode()==200){
+				if(resp!=null){
 					r=(JsonObject) new JsonParser().parse(new JsonReader(new StringReader(resp.getContent())));
 					if(r.has("failed")){
 						System.err.println(gson.fromJson(r.get("failed"), Object.class));
@@ -115,9 +122,9 @@ public class msh extends Thread{
 								if(((String)o[i][5]).startsWith("/")&&((String)o[i][5]).split(" ")[0]!="/"){
 		//							w.println(c.users().get(act).userIds(((Integer)((Double)o[i][3]).intValue()).toString()).execute().get(0).getNickname()+" requested \""+(String)o[i][5]+"\"");
 									userCmd(((String)o[i][5]).replaceFirst("/", ""),((Double)o[i][3]).intValue(),c.messages().getById(act, ((Double)o[i][1]).intValue()).execute().getItems().get(0));
-								}else if(((String)o[i][5]).startsWith("#")){
+								}else if(((String)o[i][5]).startsWith("\\")){
 									if(c.messages().getById(act, ((Double)o[i][1]).intValue()).execute().getItems().get(0).getFromId().intValue()==adminId){
-										adminCmd(((String)o[i][5]).replaceFirst("#", ""), ((Double)o[i][3]).intValue());
+										adminCmd(((String)o[i][5]).replaceFirst("\\", ""), ((Double)o[i][3]).intValue());
 									}else{
 		//								w.println(c.users().get(act).userIds(((Integer)((Double)o[i][3]).intValue()).toString()).execute().get(0).getNickname()+" was tried to exec admin command \""+(String)o[i][5]+"\"");
 										c.messages().send(act).peerId(((Double)o[i][3]).intValue()).message("\"403 говорит о том, что я не стану вести бесед с ментом.\"").attachment("audio220392464_456239152").execute();
@@ -130,16 +137,18 @@ public class msh extends Thread{
 						ts=lpp.getTs();
 						key=lpp.getKey();
 					}
+					resp=null;
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
+				resp=null;
 			}
 		}
 	}
 	public void adminCmd(String cmd, int peerId) throws Exception{
 		if(cmd.startsWith("modprobe")){
-			if(cmd.split(" ").length==2){
-				module tmp=new modprobe().load(cmd.split(" ")[1]);
+			if(cmd.split(" ").length==2||cmd.split(" ").length==3){
+				module tmp=new modprobe().load(cmd.replaceFirst("modprobe ",""));
 				if(!enabled.containsKey(tmp.getClass().getAnnotation(moduleInfo.class).internalName())){
 					tmp.onLoad();
 					c.messages().send(act).peerId(peerId).message("Module \""+tmp.getClass().getAnnotation(moduleInfo.class).name()+"\" loaded").execute();
@@ -184,7 +193,7 @@ public class msh extends Thread{
 //				}else{
 //					c.messages().send(act).peerId(peerId).message("Хмм...\n В модуле \""+cmd.split(":")[0]+"\" нет комманды \""+cmd.split(":")[1]+"\"");
 //				}
-			}else if(cmd.equals("")){}else{
+			}else if(cmd.split(" ")[0].equals("")){}else{
 				c.messages().send(act).peerId(peerId).message("\"Хозяева не нашли вещей в своей квартире? А мы-то ту причём? 404!\"").attachment("audio220392464_456239152").execute();
 			}
 		} catch (Exception e) {

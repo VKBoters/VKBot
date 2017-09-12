@@ -52,7 +52,7 @@ public class bash extends Thread{
 				}else if(command("whatisit")){
 					System.out.println(bash.class.getAnnotation(moduleInfo.class).name());
 				}else if(cmd.startsWith("modprobe")){
-					if(cmd.split(" ").length==2){
+					if(cmd.split(" ").length==2||cmd.split(" ").length==3){
 						tmp=new modprobe().load(cmd.split(" ")[1]);
 //						tmp=(module) m.newInstance();
 						if(!MSH.enabled.containsKey(tmp.getClass().getAnnotation(moduleInfo.class).internalName())){
@@ -64,7 +64,7 @@ public class bash extends Thread{
 							System.err.println("Mudule aleready loaded");
 						}
 					}else{
-						System.out.println("Usage: modprobe [class]");
+						System.out.println("Usage: modprobe [class]\nOr modprobe [URL] [class]");
 					}
 				}else if(cmd.startsWith("exec ")){
 					String sum="";
