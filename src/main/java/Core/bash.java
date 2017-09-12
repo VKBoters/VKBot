@@ -53,7 +53,7 @@ public class bash extends Thread{
 					System.out.println(bash.class.getAnnotation(moduleInfo.class).name());
 				}else if(cmd.startsWith("modprobe")){
 					if(cmd.split(" ").length==2||cmd.split(" ").length==3){
-						tmp=new modprobe().load(cmd.split(" ")[1]);
+						tmp=new modprobe().load(cmd.replaceFirst("modprobe ",""));
 //						tmp=(module) m.newInstance();
 						if(!MSH.enabled.containsKey(tmp.getClass().getAnnotation(moduleInfo.class).internalName())){
 							tmp.onLoad();
