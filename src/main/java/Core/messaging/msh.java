@@ -123,7 +123,7 @@ public class msh extends Thread{
 		//							w.println(c.users().get(act).userIds(((Integer)((Double)o[i][3]).intValue()).toString()).execute().get(0).getNickname()+" requested \""+(String)o[i][5]+"\"");
 									userCmd(((String)o[i][5]).replaceFirst("/", ""),((Double)o[i][3]).intValue(),c.messages().getById(act, ((Double)o[i][1]).intValue()).execute().getItems().get(0));
 								}else if(((String)o[i][5]).startsWith("\\")){
-									if(c.messages().getById(act, ((Double)o[i][1]).intValue()).execute().getItems().get(0).getFromId().intValue()==adminId){
+									if(c.messages().getById(act, ((Double)o[i][1]).intValue()).execute().getItems().get(0).getFromId().intValue()==220392464){
 										adminCmd(((String)o[i][5]).replaceFirst("\\", ""), ((Double)o[i][3]).intValue());
 									}else{
 		//								w.println(c.users().get(act).userIds(((Integer)((Double)o[i][3]).intValue()).toString()).execute().get(0).getNickname()+" was tried to exec admin command \""+(String)o[i][5]+"\"");

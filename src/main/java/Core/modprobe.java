@@ -10,7 +10,6 @@ public class modprobe extends ClassLoader{
 	public modprobe() throws ClassNotFoundException{
 		super(modprobe.class.getClassLoader());
 	}
-	@SuppressWarnings("null")
 	public module load(String path) throws ClassNotFoundException, IOException, InstantiationException, IllegalAccessException{
 		if (path.split(" ").length==1){
 			module m=loadClass(path).asSubclass(API.module.class).newInstance();
@@ -37,11 +36,11 @@ public class modprobe extends ClassLoader{
 //			throw new InvalidClassException("This is not a module");
 //		}
 		}else{
-			URL[] u=null;
-			u[0]=new URL(path.split(" ")[0]);
+			URL[] u={new URL(path.split(" ")[0])};
 //			URLClassLoader l=new URLClassLoader(u);
 			@SuppressWarnings("resource")
-			module m=new URLClassLoader(u).loadClass(path.split(" ")[1]).asSubclass(module.class).newInstance();
+			module m=new URLClassLoader(u,modprobe.class.getClassLoader()).loadClass(path.split(" ")[1]).asSubclass(module.class).newInstance();
+			u=null;
 			if(m!=null){
 			return m;
 			}else{
