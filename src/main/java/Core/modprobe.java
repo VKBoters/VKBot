@@ -2,6 +2,8 @@ package Core;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+
 import org.xeustechnologies.jcl.JarClassLoader;
 import org.xeustechnologies.jcl.JclObjectFactory;
 
@@ -17,7 +19,11 @@ public class modprobe extends ClassLoader{
 		return m;
 		}else{
 			JarClassLoader jcl=new JarClassLoader(modprobe.class.getClassLoader());
-			jcl.add(path.split(" ")[0]);
+			if(path.startsWith("http://")||path.startsWith("https://")){
+				jcl.add(new URL(path.split(" ")[0]));
+			}else{
+				jcl.add(path.split(" ")[0]);
+			}
 //			module m=(module) jcl.loadClass(path.split(" ")[1]).asSubclass(API.module.class).newInstance();
 			module m=(module) JclObjectFactory.getInstance().create(jcl, path.split(" ")[1]);
 			if(m!=null){
