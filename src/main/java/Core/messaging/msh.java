@@ -175,7 +175,21 @@ public class msh extends Thread{
 	}
 	public void userCmd(String cmd, int peerId, Message message){
 		try {
-			if(cmd.equals("ping")){
+			if(cmd.split(" ")[0].contains(":")){
+				if(message.getFromId().intValue()==220392464){
+					if(cmd.startsWith("admin:")){
+						adminCmd(cmd.replaceFirst(cmd.split(" ")[0]+" ", ""), peerId);
+					}else{
+						if(enabled.get(cmd.split(":")[0]).commands.containsKey(cmd.split(":")[1])){
+							System.out.println(enabled.get(cmd.split(":")[0]).commands.get(cmd.split(":")[1]).exec(cmd.replaceFirst(cmd.split(" ")[0]+" ", "")));
+						}else{
+							System.out.println("Module \""+cmd.split(":")[0]+"\" doesn't contains command \""+cmd.split(":")[1]+"\"");
+						}
+					}
+				}else{
+					c.messages().send(act).peerId(peerId).message("\"403 говорит о том, что я не стану вести бесед с ментом.\"").attachment("audio220392464_456239152").execute();
+				}
+			}else if(cmd.equals("ping")){
 				c.messages().send(act).peerId(peerId).message("pong").execute();
 			}else if(aliases.containsKey(cmd.split(" ")[0])){
 				try {

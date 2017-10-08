@@ -52,7 +52,35 @@ public class bash extends Thread{
 				}else if(command("whatisit")){
 					System.out.println(bash.class.getAnnotation(moduleInfo.class).name());
 				}else if(cmd.startsWith("modprobe")){
-					if(cmd.split(" ").length==2||cmd.split(" ").length==3){
+					String tmpStr=cmd.replaceFirst("modprobe ","");
+					if(cmd.replaceFirst("modprobe ","").startsWith("-")){
+						if(tmpStr.startsWith("-r")){
+							if(MSH.loaded.containsKey(tmpStr.split(" ")[1])){
+								MSH.loaded.remove(tmpStr.split(" ")[1]);
+							}else if(MSH.enabled.containsKey(tmpStr.split(" ")[1])){
+								tmp=MSH.enabled.remove(tmpStr.split(" ")[1]);
+								tmp.disablePlugin();
+							}else{
+								System.out.println("Module \""+tmpStr.split(" ")[1]+"\" doesn't loaded");
+							}
+						}else if(tmpStr.startsWith("-d")){
+							if(MSH.enabled.containsKey(tmpStr.split(" ")[1])){
+								tmp=MSH.enabled.remove(tmpStr.split(" ")[1]);
+								tmp.disablePlugin();
+								MSH.loaded.put(tmpStr.split(" ")[1], tmp);
+							}else{
+								System.out.println("Module \""+tmpStr.split(" ")[1]+"\" doesn't enabled");
+							}
+						}else if(tmpStr.startsWith("-e")){
+							if(MSH.loaded.containsKey(tmpStr.split(" ")[1])){
+								tmp=MSH.loaded.remove(tmpStr.split(" ")[1]);
+								tmp.enablePlugin();
+								MSH.enabled.put(tmpStr.split(" ")[1], tmp);
+							}else{
+								System.out.println("Module \""+tmpStr.split(" ")[1]+"\" enabled or not loaded");
+							}
+						}
+					}else if(cmd.split(" ").length==2||cmd.split(" ").length==3){
 						tmp=new modprobe().load(cmd.replaceFirst("modprobe ",""));
 //						tmp=(module) m.newInstance();
 						if(!MSH.enabled.containsKey(tmp.getClass().getAnnotation(moduleInfo.class).internalName())){
