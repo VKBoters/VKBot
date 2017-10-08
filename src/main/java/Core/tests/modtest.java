@@ -2,9 +2,7 @@ package Core.tests;
 import API.Command;
 import API.module;
 import API.moduleInfo;
-import Core.bash;
 import Core.version;
-import Core.messaging.msh;
 import Core.tests.commands.testmsg;
 
 /** @author uis */
@@ -17,19 +15,8 @@ public class modtest extends module{
 		System.out.println("testOnEnable");
 	}
 	@Override
-	public void exec(String[] arg, bash bash) {
-		// TODO Auto-generated method stub
-
-	}
-	@Override
-	public void exec(String[] arg, msh msh) {
-		// TODO Auto-generated method stub
-
-	}
-	@Override
 	public void disablePlugin() {
 		// TODO Auto-generated method stub
-
 	}
 	@Override
 	public void onLoad() {
