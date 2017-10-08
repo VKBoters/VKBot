@@ -173,12 +173,13 @@ public class msh extends Thread{
 			}
 		}
 	}
+	Command tmp;
 	public void userCmd(String cmd, int peerId, Message message){
 		try {
 			if(cmd.split(" ")[0].contains(":")){
-				if(message.getFromId().intValue()==220392464){
+				if(message.getUserId().intValue()==220392464){
 					if(cmd.startsWith("admin:")){
-						adminCmd(cmd.replaceFirst(cmd.split(" ")[0]+" ", ""), peerId);
+						adminCmd(cmd.replaceFirst("admin:", ""), peerId);
 					}else{
 						if(enabled.get(cmd.split(":")[0]).commands.containsKey(cmd.split(":")[1])){
 							System.out.println(enabled.get(cmd.split(":")[0]).commands.get(cmd.split(":")[1]).exec(cmd.replaceFirst(cmd.split(" ")[0]+" ", "")));
@@ -193,7 +194,9 @@ public class msh extends Thread{
 				c.messages().send(act).peerId(peerId).message("pong").execute();
 			}else if(aliases.containsKey(cmd.split(" ")[0])){
 				try {
-					aliases.get(cmd.split(" ")[0]).exec(cmd.replaceFirst(cmd.split(" ")[0]+" ", ""), peerId, message, c, act);
+					tmp=aliases.remove(cmd.split(" ")[0]);
+					tmp.exec(cmd.replaceFirst(cmd.split(" ")[0]+" ", ""), peerId, message, c, act);
+					aliases.put(cmd.split(" ")[0], tmp);
 				} catch (Exception e) {
 					c.messages().send(act).peerId(peerId).message("Команда \""+cmd.split(" ")[0]+"\" решила плюнуть исключение: "+e.getMessage()).execute();
 				}
