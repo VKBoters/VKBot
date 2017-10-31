@@ -33,12 +33,8 @@ public class bash extends Thread{
 				cmd=br.readLine();
 				if(cmd.equals("")){}else if(command("test")){
 					System.out.println("Successful");
-				}else if(command("oauth")){
-					Core.commands.oauth.exec(cmd.split(" "));
 				}else if(cmd.equals("exit")){
 					break;
-				}else if(command("init")){
-					Core.commands.init.exec(cmd.split(" "), this);
 				}else if(command("mshInit")){
 					if(cmd.split(" ").length==3){
 						MSH.mshInit(Integer.parseInt(cmd.split(" ")[1]), cmd.split(" ")[2]);
