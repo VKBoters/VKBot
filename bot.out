@@ -1,0 +1,14 @@
+2017-10-21 15:30:22 INFO  bash:101 - test
+2017-10-21 16:03:48 INFO  bash:101 - test
+2017-10-27 21:39:41 INFO  HttpTransportClient:171 - Request: https://api.vk.com/method/account.setOnline		704
+2017-10-27 21:39:41 INFO  HttpTransportClient:171 - Request: https://api.vk.com/method/messages.getLongPollServer		66
+2017-10-27 21:59:52 INFO  HttpTransportClient:171 - Request: https://api.vk.com/method/account.setOnline		710
+2017-10-27 21:59:52 INFO  HttpTransportClient:171 - Request: https://api.vk.com/method/messages.getLongPollServer		58
+2017-10-27 22:00:17 INFO  HttpTransportClient:171 - Request: https://api.vk.com/method/account.setOnline		427
+2017-10-27 22:00:17 INFO  HttpTransportClient:171 - Request: https://api.vk.com/method/messages.getLongPollServer		55
+2017-10-27 22:02:39 INFO  HttpTransportClient:21 - Best
+2017-10-27 22:02:39 INFO  HttpTransportClient:21 - Best
+2017-10-27 22:02:45 INFO  HttpTransportClient:171 - Request: https://api.vk.com/method/account.setOnline		449
+2017-10-27 22:02:45 INFO  HttpTransportClient:171 - Request: https://api.vk.com/method/messages.getLongPollServer		53
+2017-11-05 17:05:06 INFO  HttpTransportClient:21 - Best
+2017-11-05 17:05:06 INFO  HttpTransportClient:21 - Best

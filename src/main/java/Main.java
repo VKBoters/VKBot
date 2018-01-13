@@ -1,8 +1,9 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import Core.bash;
+import org.slf4j.LoggerFactory;
 
+import Core.bash;
 public class Main{
 	public Main() throws Exception{
 //		TransportClient c=HttpTransportClient.getInstance();
@@ -15,6 +16,9 @@ public class Main{
 		b.join();
 	}
 	public static void main(String[] args) {
+//		System.setProperty("java.util.logging.FileHandler.pattern", "bot.log");
+//		Slf4JLoggerFactory.getInstance("").info("Test");
+		LoggerFactory.getLogger("HttpTransportClient").info("Best");
 		try {
 			new Main();
 		} catch (Exception e) {

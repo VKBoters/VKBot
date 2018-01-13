@@ -32,8 +32,8 @@ public class msh extends Thread{
 	public VkApiClient c=new VkApiClient(tc);
 //	VkStreamingApiClient sc=new VkStreamingApiClient(tc);
 	UserActor act;
-	public HashMap<String,module> loaded=new HashMap<String,module>();
-	public HashMap<String,module> enabled=new HashMap<String,module>();
+	public static HashMap<String,module> loaded=new HashMap<String,module>();
+	public static HashMap<String,module> enabled=new HashMap<String,module>();
 	public HashMap<String,Command> aliases=new HashMap<String, Command>();
 	LongpollParams lpp;
 	public msh(){
@@ -182,7 +182,7 @@ public class msh extends Thread{
 						adminCmd(cmd.replaceFirst("admin:", ""), peerId);
 					}else{
 						if(enabled.get(cmd.split(":")[0]).commands.containsKey(cmd.split(":")[1])){
-							System.out.println(enabled.get(cmd.split(":")[0]).commands.get(cmd.split(":")[1]).exec(cmd.replaceFirst(cmd.split(" ")[0]+" ", "")));
+							enabled.get(cmd.split(":")[0]).commands.get(cmd.split(":")[1]).exec(cmd.replaceFirst(cmd.split(" ")[0]+" ", ""), peerId, message, c, act);
 						}else{
 							System.out.println("Module \""+cmd.split(":")[0]+"\" doesn't contains command \""+cmd.split(":")[1]+"\"");
 						}
