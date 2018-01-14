@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import API.module;
 import API.moduleInfo;
 import Core.messaging.msh;
-@moduleInfo(author="uis",dependencies="",internalName="bash",name="Burn Again Shell",version=Core.version.CoreVersion,build=Core.version.CoreBuild)
+@moduleInfo(author="uis",internalName="bash",name="Burn Again Shell",version=Core.version.CoreVersion,build=Core.version.CoreBuild)
 public class bash extends Thread{
 	BufferedReader br=null;
 //	Runtime
