@@ -36,19 +36,11 @@ public class msh extends Thread{
 	public static HashMap<String,module> enabled=new HashMap<String,module>();
 	public HashMap<String,Command> aliases=new HashMap<String, Command>();
 	LongpollParams lpp;
-	public msh(){
-//		l=new File("access.log");
-//		if(!l.exists()){
-//			try {
-//				l.createNewFile();
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		if(!l.canWrite()){
-//			l.setWritable(true);
-//		}
-	}
+//	public msh(){
+//		ServiceManager.addProfileManager((byte) 0x00, new VKProfileManager());
+//		ServiceManager.getProfileManager((byte) 0x00).addProfile(1112, new VKUserProfile("uis"));
+//		System.out.println(ServiceManager.getProfileManager((byte) 0x00).getProfile(1112).getNick());
+//	}
 	public void mshInit(int id, String token){
 		try {
 			act=new UserActor(id,token);
