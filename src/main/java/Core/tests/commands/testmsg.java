@@ -17,6 +17,6 @@ public class testmsg implements Command{
 	}
 	@Override
 	public byte OPLevel() {
-		return 0;
+		return -128;
 	}
 }
