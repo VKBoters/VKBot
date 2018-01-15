@@ -167,7 +167,7 @@ public void adminCmd(String cmd, int peerId) throws Exception{
 				}else{
 					c.messages().send(act).peerId(peerId).message("\"403 говорит о том, что я не стану вести бесед с ментом.\"").attachment("audio220392464_456239152").execute();
 				}
-			}else if(cmd.equals("ping")){
+			}else if(cmd[0].equals("ping")){
 				c.messages().send(act).peerId(peerId).message("pong").execute();
 			}else if(cmd[0].equals("nick")){
 				if(cmd.length>1){
