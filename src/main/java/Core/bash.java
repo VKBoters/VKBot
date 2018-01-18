@@ -14,6 +14,7 @@ import API.module;
 import API.moduleInfo;
 import API.multiuser.ProfileManager;
 import API.multiuser.ServiceManager;
+import API.multiuser.VKProfileManager;
 import Core.messaging.msh;
 @moduleInfo(author="uis",internalName="bash",name="Burn Again Shell",version=Core.version.CoreVersion,build=Core.version.CoreBuild)
 public class bash extends Thread{
@@ -33,6 +34,7 @@ public class bash extends Thread{
 				ServiceManager.m=(LinkedHashMap<Object, ProfileManager>) new ObjectInputStream(new FileInputStream(f)).readObject();
 			}else {
 				ServiceManager.m=new LinkedHashMap<Object, ProfileManager>();
+				ServiceManager.addProfileManager("v", new VKProfileManager());
 //				MSH=new msh();
 			}
 		} catch (Exception e) {

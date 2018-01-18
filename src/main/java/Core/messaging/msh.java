@@ -23,7 +23,6 @@ import API.module;
 import API.moduleInfo;
 import API.multiuser.ProfileManager;
 import API.multiuser.ServiceManager;
-import API.multiuser.VKProfileManager;
 import API.multiuser.VKUserProfile;
 import Core.modprobe;
 
@@ -48,9 +47,6 @@ public class msh extends Thread implements Serializable{
 //		f=file;
 	}
 	public void mshInit(int id, String token){
-		if(ServiceManager.m==null){
-			ServiceManager.addProfileManager("v", new VKProfileManager());
-		}
 		man=ServiceManager.getProfileManager("v");
 		try {
 			act=new UserActor(id,token);
