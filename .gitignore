@@ -27,3 +27,4 @@ build
 .settings
 /bot.out
 /log.out
+ServiceManager.bin
