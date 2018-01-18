@@ -6,8 +6,9 @@ public class Main{
 	public Main() throws Exception{
 		BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
 		bash b=new bash(br);
-		b.start();
-		b.join();
+		b.run();
+//		b.start();
+//		b.join();
 	}
 	public static void main(String[] args) {
 		try {

@@ -1,6 +1,6 @@
 package Core.messaging;
 
-import java.io.File;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.util.HashMap;
 
@@ -29,7 +29,11 @@ import Core.modprobe;
 
 /** @author uis */
 @moduleInfo(author="uis",internalName="msh",name="Message Shell",version=Core.version.CoreVersion,build=Core.version.CoreBuild)
-public class msh extends Thread{
+public class msh extends Thread implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5663253346224888371L;
 	ProfileManager man;
 	public static final int adminId=220392464;
 	TransportClient tc=new HttpTransportClient();
@@ -39,13 +43,15 @@ public class msh extends Thread{
 	public static HashMap<String,module> enabled=new HashMap<String,module>();
 	public HashMap<String,Command> aliases=new HashMap<String, Command>();
 	LongpollParams lpp;
-	public File f;
-	public msh(File file) throws Exception{
-		f=file;
-		ServiceManager.addProfileManager("v", new VKProfileManager());
-		man=ServiceManager.getProfileManager("v");
+//	public File f;
+	public msh(){
+//		f=file;
 	}
 	public void mshInit(int id, String token){
+		if(ServiceManager.m==null){
+			ServiceManager.addProfileManager("v", new VKProfileManager());
+		}
+		man=ServiceManager.getProfileManager("v");
 		try {
 			act=new UserActor(id,token);
 			c.account().setOnline(act).execute();

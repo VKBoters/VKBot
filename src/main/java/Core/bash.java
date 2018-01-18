@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.LinkedHashMap;
 
 import API.module;
 import API.moduleInfo;
@@ -21,14 +22,17 @@ public class bash extends Thread{
 	public bash(BufferedReader reader) {
 		br=reader;
 	}
-	public bash() {
-		File f=new File("ServiceManager.bin");
+	File f;
+	public bash() {}
+	@SuppressWarnings("unchecked")
+	private void des(){
+		f=new File(System.getProperty("user.dir")+"/ServiceManager.bin");
 		try {
 			if(f.exists()){
 //				ObjectInputStream des=new ObjectInputStream(new FileInputStream(f));
-				MSH=(msh) new ObjectInputStream(new FileInputStream(f)).readObject();
+				ServiceManager.m=(LinkedHashMap<Object, ProfileManager>) new ObjectInputStream(new FileInputStream(f)).readObject();
 			}else {
-				MSH=new msh(f);
+//				MSH=new msh();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -43,11 +47,12 @@ public class bash extends Thread{
 	String user="root";
 	String host="VKBot";
 	module tmp;
-	msh MSH;
+	msh MSH=new msh();
 	ProfileManager man;
-	@SuppressWarnings({ })
 	@Override
 	public void run(){
+		des();
+		MSH.setName("Message Shell");
 		man=ServiceManager.getProfileManager("v");
 		while(true){
 			try{
@@ -57,6 +62,7 @@ public class bash extends Thread{
 					if(MSH.isAlive()){
 						mshStop();
 					}
+					serial();
 					System.exit(0);
 //					break;
 				}else if(command("mshInit")){
@@ -66,8 +72,10 @@ public class bash extends Thread{
 						System.out.println("Usage: mshInit [id] [token]");
 					}
 				}else if(command("mshStart")){
+//					System.out.println("ssss");
 					MSH.start();
-				}else if(command("mshStop")){
+//					MSH.resume();
+				}else if(command("mshPause")){
 					mshStop();
 				}else if(command("nick")){
 					switch(cmd.split(" ")[1]){
@@ -181,14 +189,23 @@ public class bash extends Thread{
 			}
 		}
 	}
-	@SuppressWarnings({ "resource", "deprecation" })
+	
+	@SuppressWarnings("deprecation")
 	private void mshStop(){
-	try {
-		MSH.stop();
-			if(!MSH.f.exists()){
-					MSH.f.createNewFile();
-				}
-			new ObjectOutputStream(new FileOutputStream(MSH.f)).writeObject(this);
+		serial();
+		if(MSH.isAlive()) {
+			MSH.suspend();
+		}else{
+			MSH.resume();
+		}
+	}
+	@SuppressWarnings("resource")
+	private void serial(){
+		try {
+			if(!f.exists()){
+				f.createNewFile();
+			}
+			new ObjectOutputStream(new FileOutputStream(f)).writeObject(ServiceManager.m);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
