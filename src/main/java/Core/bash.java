@@ -32,6 +32,7 @@ public class bash extends Thread{
 //				ObjectInputStream des=new ObjectInputStream(new FileInputStream(f));
 				ServiceManager.m=(LinkedHashMap<Object, ProfileManager>) new ObjectInputStream(new FileInputStream(f)).readObject();
 			}else {
+				ServiceManager.m=new LinkedHashMap<Object, ProfileManager>();
 //				MSH=new msh();
 			}
 		} catch (Exception e) {
