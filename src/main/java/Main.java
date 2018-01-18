@@ -10,7 +10,6 @@ public class Main{
 		b.join();
 	}
 	public static void main(String[] args) {
-//		LoggerFactory.getLogger("HttpTransportClient").info("Best");
 		try {
 			new Main();
 		} catch (Exception e) {

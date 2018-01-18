@@ -1,5 +1,6 @@
 package Core.messaging;
 
+import java.io.File;
 import java.io.StringReader;
 import java.util.HashMap;
 
@@ -38,12 +39,11 @@ public class msh extends Thread{
 	public static HashMap<String,module> enabled=new HashMap<String,module>();
 	public HashMap<String,Command> aliases=new HashMap<String, Command>();
 	LongpollParams lpp;
-	public msh(){
-		ServiceManager.addProfileManager((byte) 0x00, new VKProfileManager());
-		man=ServiceManager.getProfileManager((byte) 0x00);
-//		ServiceManager.addProfileManager((byte) 0x00, new VKProfileManager());
-//		ServiceManager.getProfileManager((byte) 0x00).addProfile(1112, new VKUserProfile("uis"));
-//		System.out.println(ServiceManager.getProfileManager((byte) 0x00).getProfile(1112).getNick());
+	public File f;
+	public msh(File file) throws Exception{
+		f=file;
+		ServiceManager.addProfileManager("v", new VKProfileManager());
+		man=ServiceManager.getProfileManager("v");
 	}
 	public void mshInit(int id, String token){
 		try {
@@ -184,6 +184,12 @@ public void adminCmd(String cmd, int peerId) throws Exception{
 						}else{
 							man.addProfile(senderId, new VKUserProfile(cmd[2]));
 							c.messages().send(act).peerId(peerId).message("Профиль создан\nНик установлен").execute();
+						}
+					}else if(cmd[1].equals("getOPLevel")){
+						if(man.isExist(senderId)){
+							c.messages().send(act).peerId(peerId).message("Ваш уровень оператора: "+man.getProfile(senderId).getOPLevel()+"\nУровень рядового пользователя: -128").execute();
+						}else{
+							c.messages().send(act).peerId(peerId).message("У вас отсутствует профиль. Вы можете создать выполнив команду \"/nick set (nick)\"").execute();
 						}
 					}else{
 						c.messages().send(act).peerId(peerId).message("Ти дурак или как?").execute();

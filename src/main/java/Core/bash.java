@@ -1,10 +1,18 @@
 package Core;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import API.module;
 import API.moduleInfo;
+import API.multiuser.ProfileManager;
+import API.multiuser.ServiceManager;
 import Core.messaging.msh;
 @moduleInfo(author="uis",internalName="bash",name="Burn Again Shell",version=Core.version.CoreVersion,build=Core.version.CoreBuild)
 public class bash extends Thread{
@@ -14,6 +22,17 @@ public class bash extends Thread{
 		br=reader;
 	}
 	public bash() {
+		File f=new File("ServiceManager.bin");
+		try {
+			if(f.exists()){
+//				ObjectInputStream des=new ObjectInputStream(new FileInputStream(f));
+				MSH=(msh) new ObjectInputStream(new FileInputStream(f)).readObject();
+			}else {
+				MSH=new msh(f);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	String cmd;
 	boolean isUser=false;
@@ -24,16 +43,22 @@ public class bash extends Thread{
 	String user="root";
 	String host="VKBot";
 	module tmp;
-	msh MSH=new msh();
-	@SuppressWarnings({ "deprecation" })
+	msh MSH;
+	ProfileManager man;
+	@SuppressWarnings({ })
 	@Override
 	public void run(){
+		man=ServiceManager.getProfileManager("v");
 		while(true){
 			try{
 				System.out.print(user+"@"+host+"#");
 				cmd=br.readLine();
 				if(cmd.equals("")){}else if(cmd.equals("exit")){
-					break;
+					if(MSH.isAlive()){
+						mshStop();
+					}
+					System.exit(0);
+//					break;
 				}else if(command("mshInit")){
 					if(cmd.split(" ").length==3){
 						MSH.mshInit(Integer.parseInt(cmd.split(" ")[1]), cmd.split(" ")[2]);
@@ -43,7 +68,30 @@ public class bash extends Thread{
 				}else if(command("mshStart")){
 					MSH.start();
 				}else if(command("mshStop")){
-					MSH.stop();
+					mshStop();
+				}else if(command("nick")){
+					switch(cmd.split(" ")[1]){
+					case "setOPLevel":
+						if(cmd.split(" ").length==4){
+							man.getProfile(Integer.parseInt(cmd.split(" ")[3])).setOPLevel(Byte.valueOf(cmd.split(" ")[2]));
+							break;
+						}
+						break;
+					case "set":
+//						if(cmd.split(" ").length==3){
+//							
+//						}
+						if(cmd.split(" ").length==4){
+							man.getProfile(Integer.parseInt(cmd.split(" ")[3])).setNick(cmd.split(" ")[2]);
+							break;
+						}
+						System.out.println("Ти дурак!");
+						break;
+					case "get":
+						break;
+					default:
+						break;
+					}
 				}else if(command("whatisit")){
 					System.out.println(bash.class.getAnnotation(moduleInfo.class).name());
 				}else if(cmd.startsWith("modprobe")){
@@ -131,6 +179,18 @@ public class bash extends Thread{
 //				System.out.println(e.toString());
 				e.printStackTrace();
 			}
+		}
+	}
+	@SuppressWarnings({ "resource", "deprecation" })
+	private void mshStop(){
+	try {
+		MSH.stop();
+			if(!MSH.f.exists()){
+					MSH.f.createNewFile();
+				}
+			new ObjectOutputStream(new FileOutputStream(MSH.f)).writeObject(this);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	protected boolean command(String what){
