@@ -20,4 +20,8 @@ public class testmsg implements Command{
 		return -128;
 //		return 127;
 	}
+	@Override
+	public String description() {
+		return "Test messenge";
+	}
 }

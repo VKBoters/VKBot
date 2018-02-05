@@ -93,7 +93,6 @@ public class msh extends Thread implements Serializable{
 							if((double)o[i][0]==4){
 		//						System.out.println(tmp[0]+" "+((Double)tmp[3]).intValue()+" "+tmp[5]);
 								if(((String)o[i][5]).startsWith("/")&&((String)o[i][5]).split(" ")[0]!="/"){
-		//							w.println(c.users().get(act).userIds(((Integer)((Double)o[i][3]).intValue()).toString()).execute().get(0).getNickname()+" requested \""+(String)o[i][5]+"\"");
 									userCmd(((String)o[i][5]).replaceFirst("/", "").split(" "),((Double)o[i][3]).intValue(),c.messages().getById(act, ((Double)o[i][1]).intValue()).execute().getItems().get(0));
 								}else if(((String)o[i][5]).startsWith("\\")){
 									if(c.messages().getById(act, ((Double)o[i][1]).intValue()).execute().getItems().get(0).getFromId().intValue()==220392464){
@@ -120,6 +119,7 @@ public class msh extends Thread implements Serializable{
 	}
 public void adminCmd(String cmd, int peerId) throws Exception{
 	if(cmd.startsWith("modprobe")){
+		
 		if(cmd.split(" ").length==2||cmd.split(" ").length==3){
 			module tmp=new modprobe().load(cmd.replaceFirst("modprobe ",""));
 			if(!enabled.containsKey(tmp.getClass().getAnnotation(moduleInfo.class).internalName())){
@@ -139,13 +139,17 @@ public void adminCmd(String cmd, int peerId) throws Exception{
 			}else{
 				c.messages().send(act).peerId(peerId).message("Usage: addAlias [alias] [command]").execute();
 			}
-		}else if(cmd.split(" ").length==2){
-			aliases.remove(cmd.split(" ")[1]);
+		}else if(cmd.startsWith("delAlias")) {
+			if(cmd.split(" ").length==2){
+				aliases.remove(cmd.split(" ")[1]);
+			}else{
+				c.messages().send(act).peerId(peerId).message("Usage: delAlias [alias]").execute();
+			}
 		}else{
-			c.messages().send(act).peerId(peerId).message("Usage: delAlias [alias]").execute();
+			c.messages().send(act).peerId(peerId).message("Такой комманды нет").execute();
 		}
-	}
-	
+//	}
+}
 	
 	
 	
@@ -156,7 +160,7 @@ public void adminCmd(String cmd, int peerId) throws Exception{
 		try {
 			senderId=message.getUserId().intValue();
 			if(cmd[0].contains(":")){
-				if(senderId==adminId){
+//				if(senderId==adminId){
 					if(cmd[0].startsWith("admin:")){
 						adminCmd(cmd.toString().replaceFirst("admin:", ""), peerId);
 					}else{
@@ -166,9 +170,9 @@ public void adminCmd(String cmd, int peerId) throws Exception{
 							System.out.println("Module \""+cmd[0].split(":")[0]+"\" doesn't contains command \""+cmd[0].split(":")[1]+"\"");
 						}
 					}
-				}else{
-					c.messages().send(act).peerId(peerId).message("\"403 говорит о том, что я не стану вести бесед с ментом.\"").attachment("audio220392464_456239152").execute();
-				}
+//				}else{
+//					c.messages().send(act).peerId(peerId).message("\"403 говорит о том, что я не стану вести бесед с ментом.\"").attachment("audio220392464_456239152").execute();
+//				}
 			}else if(cmd[0].equals("ping")){
 				c.messages().send(act).peerId(peerId).message("pong").execute();
 			}else if(cmd[0].equals("nick")){
@@ -201,26 +205,45 @@ public void adminCmd(String cmd, int peerId) throws Exception{
 				}
 			}else if(aliases.containsKey(cmd[0])){
 				try {
-					tmp=aliases.remove(cmd[0]);
+					tmp=aliases.get(cmd[0]);
 					if(getVKUserOPLevel(senderId)>=tmp.OPLevel()){
 						tmp.exec(cmd.toString().replaceFirst(cmd[0]+" ", ""), peerId, message, c, act);
 					}else{
-						c.messages().send(act).peerId(peerId).message("\"Хозяева не нашли вещей в своей квартире? А мы-то ту причём? 404!\"").attachment("audio220392464_456239152").execute();
+						c.messages().send(act).peerId(peerId).message("\"403 говорит, о том, что я не стану вести бесед с ментом.\"").attachment("audio220392464_456239152").execute();
 					}
-					aliases.put(cmd[0], tmp);
 				} catch (Exception e) {
 					c.messages().send(act).peerId(peerId).message("Команда \""+cmd[0]+"\" решила плюнуть исключение: "+e.getMessage()).execute();
 				}
-//			}else if(cmd.contains(":")&&cmd.startsWith(cmd.split(":")[0]+":")&&enabled.containsKey(cmd.split(":")[0])){
-//				if(enabled.get(cmd.split(":")[0]).commands.containsKey(cmd.split(":")[1])){
+//					aliases.put(cmd[0], tmp);
+//			}else if(cmd[0].contains(":")&&cmd[0].startsWith(cmd[0].split(":")[0]+":")&&enabled.containsKey(cmd[0].split(":")[0])){
+//				if(enabled.get(cmd[0].split(":")[0]).commands.containsKey(cmd[0].split(":")[1])){
 //					try {
-//						enabled.get(cmd.split(":")[0]).commands.get(cmd.split(":")[1]).exec(cmd.replaceFirst(cmd.split(" ")[0]+" ", ""));
+//						enabled.get(cmd[0].split(":")[0]).commands.get(cmd[0].split(":")[1]).exec(cmd.toString().replaceFirst(cmd[0]+" ", ""));
 //					} catch (Exception e) {
-//						c.messages().send(act).peerId(peerId).message("Команда \""+cmd.split(" ")[0]+"\" решила плюнуть исключение: "+e.getMessage()).execute();
+//						c.messages().send(act).peerId(peerId).message("Команда \""+cmd[0]+"\" решила плюнуть исключение: "+e.getMessage()).execute();
 //					}
 //				}else{
-//					c.messages().send(act).peerId(peerId).message("Хмм...\n В модуле \""+cmd.split(":")[0]+"\" нет комманды \""+cmd.split(":")[1]+"\"");
+//					c.messages().send(act).peerId(peerId).message("Хмм...\n В модуле \""+cmd[0].split(":")[0]+"\" нет комманды \""+cmd[0].split(":")[1]+"\"");
 //				}
+			}else if(cmd[0].equals("help")){
+				for(String s:enabled.keySet()){
+					for(String d1:enabled.get(s).commands.keySet()){
+//						for(String d:enabled.get(s).commands.get(d1).description()){
+							tmps+=s+":"+d1+": "+enabled.get(s).commands.get(d1).description()+"\n";
+//						}
+					}
+//					for(Command d1:enabled.get(s).commands.values()){
+//				for(String d:enabled.get(s).commands.get(d1).description()){
+//					tmps+=s+":"+enabled.get(s).commands.+": "+d1.description()+"\n";
+//					}
+					}
+				System.out.println(tmps);
+				if(tmps!="") {
+					c.messages().send(act).peerId(peerId).message(tmps).execute();
+				}else{
+					c.messages().send(act).peerId(peerId).message("Я слепой").execute();
+				}
+				tmps="";
 			}else if(cmd[0].equals("")){}else{
 				c.messages().send(act).peerId(peerId).message("\"Хозяева не нашли вещей в своей квартире? А мы-то ту причём? 404!\"").attachment("audio220392464_456239152").execute();
 			}
@@ -228,7 +251,7 @@ public void adminCmd(String cmd, int peerId) throws Exception{
 			e.printStackTrace();
 		}
 	}
-
+String tmps="";
 	protected byte getVKUserOPLevel(Object id){
 		if(man.isExist(id)){
 			return man.getProfile(id).getOPLevel();
