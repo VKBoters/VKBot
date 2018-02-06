@@ -1,7 +1,9 @@
 package Core.messaging;
 
+import java.io.File;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.net.URL;
 import java.util.HashMap;
 
 import com.google.gson.Gson;
@@ -25,6 +27,7 @@ import API.multiuser.ProfileManager;
 import API.multiuser.ServiceManager;
 import API.multiuser.VKUserProfile;
 import Core.modprobe;
+import net.marketer.RuCaptcha;
 
 /** @author uis */
 @moduleInfo(author="uis",internalName="msh",name="Message Shell",version=Core.version.CoreVersion,build=Core.version.CoreBuild)
@@ -44,6 +47,7 @@ public class msh extends Thread implements Serializable{
 	LongpollParams lpp;
 //	public File f;
 	public msh(){
+		net.marketer.RuCaptcha.API_KEY="9d758210a28cd44bc0abff15066087fc";
 //		f=file;
 	}
 	public void mshInit(int id, String token){
@@ -111,12 +115,29 @@ public class msh extends Thread implements Serializable{
 					}
 					resp=null;
 				}
-			} catch (Exception e) {
+			} catch(com.vk.api.sdk.exceptions.ApiCaptchaException e) {
+				try {
+					net.marketer.Utility.saveImgByUrl(new URL(e.getImage()), "/tmp/cap/Cap"+e.getSid()+".jpg");
+					cid=net.marketer.RuCaptcha.postCaptcha(new File("/tmp/cap/Cap"+e.getSid()+".jpg"));
+					for(@SuppressWarnings("unused")
+					byte c=0; 0<10; c++){
+						tmpstr=RuCaptcha.getDecryption(cid);
+						if(tmpstr.startsWith("OK")){
+							this.c.account().setOnline(act).captchaKey(tmpstr.substring(3)).captchaSid(e.getSid()).execute();
+						}
+						sleep(1000);
+					}
+				}catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}catch (Exception e) {
 				e.printStackTrace();
 				resp=null;
 			}
 		}
 	}
+	String cid;
+	String tmpstr;
 public void adminCmd(String cmd, int peerId) throws Exception{
 	if(cmd.startsWith("modprobe")){
 		
@@ -127,6 +148,7 @@ public void adminCmd(String cmd, int peerId) throws Exception{
 				c.messages().send(act).peerId(peerId).message("Module \""+tmp.getClass().getAnnotation(moduleInfo.class).name()+"\" loaded").execute();
 				tmp.enablePlugin();
 				enabled.put(tmp.getClass().getAnnotation(moduleInfo.class).internalName(), tmp);
+				buildHelp();
 			}else{
 				c.messages().send(act).peerId(peerId).message("Module aleready loaded").execute();
 			}
@@ -136,12 +158,14 @@ public void adminCmd(String cmd, int peerId) throws Exception{
 		}else if(cmd.startsWith("addAlias")){
 			if(cmd.split(" ").length==3){
 				aliases.put(cmd.split(" ")[1], enabled.get(cmd.split(" ")[2].split(":")[0]).commands.get(cmd.split(" ")[2].split(":")[1]));
+//				buildHelp();
 			}else{
 				c.messages().send(act).peerId(peerId).message("Usage: addAlias [alias] [command]").execute();
 			}
 		}else if(cmd.startsWith("delAlias")) {
 			if(cmd.split(" ").length==2){
 				aliases.remove(cmd.split(" ")[1]);
+//				buildHelp();
 			}else{
 				c.messages().send(act).peerId(peerId).message("Usage: delAlias [alias]").execute();
 			}
@@ -159,7 +183,7 @@ public void adminCmd(String cmd, int peerId) throws Exception{
 	public void userCmd(String[] cmd, int peerId, Message message){
 		try {
 			senderId=message.getUserId().intValue();
-			if(cmd[0].contains(":")){
+			if(cmd[0].contains(":")&&cmd[0].split(":").length==2){
 //				if(senderId==adminId){
 					if(cmd[0].startsWith("admin:")){
 						adminCmd(cmd.toString().replaceFirst("admin:", ""), peerId);
@@ -167,7 +191,7 @@ public void adminCmd(String cmd, int peerId) throws Exception{
 						if(enabled.get(cmd[0].split(":")[0]).commands.containsKey(cmd[0].split(":")[1])){
 							enabled.get(cmd[0].split(":")[0]).commands.get(cmd[0].split(":")[1]).exec(cmd.toString().replaceFirst(cmd[0]+" ", ""), peerId, message, c, act);
 						}else{
-							System.out.println("Module \""+cmd[0].split(":")[0]+"\" doesn't contains command \""+cmd[0].split(":")[1]+"\"");
+							c.messages().send(act).peerId(peerId).message("В модуле \""+cmd[0].split(":")[0]+"\" нет комманды \""+cmd[0].split(":")[1]+"\"").execute();
 						}
 					}
 //				}else{
@@ -226,26 +250,29 @@ public void adminCmd(String cmd, int peerId) throws Exception{
 //					c.messages().send(act).peerId(peerId).message("Хмм...\n В модуле \""+cmd[0].split(":")[0]+"\" нет комманды \""+cmd[0].split(":")[1]+"\"");
 //				}
 			}else if(cmd[0].equals("help")){
-				for(String s:enabled.keySet()){
-					for(String d1:enabled.get(s).commands.keySet()){
-//						for(String d:enabled.get(s).commands.get(d1).description()){
-							tmps+=s+":"+d1+": "+enabled.get(s).commands.get(d1).description()+"\n";
-//						}
-					}
-//					for(Command d1:enabled.get(s).commands.values()){
-//				for(String d:enabled.get(s).commands.get(d1).description()){
-//					tmps+=s+":"+enabled.get(s).commands.+": "+d1.description()+"\n";
-//					}
-					}
-				System.out.println(tmps);
 				if(tmps!="") {
 					c.messages().send(act).peerId(peerId).message(tmps).execute();
 				}else{
 					c.messages().send(act).peerId(peerId).message("Я слепой").execute();
 				}
-				tmps="";
 			}else if(cmd[0].equals("")){}else{
 				c.messages().send(act).peerId(peerId).message("\"Хозяева не нашли вещей в своей квартире? А мы-то ту причём? 404!\"").attachment("audio220392464_456239152").execute();
+			}
+		}catch(com.vk.api.sdk.exceptions.ApiCaptchaException e) {
+			System.out.println("Captcha!");
+			try {
+				net.marketer.Utility.saveImgByUrl(new URL(e.getImage()), "/tmp/cap/Cap"+e.getSid()+".jpg");
+				cid=net.marketer.RuCaptcha.postCaptcha(new File("/tmp/cap/Cap"+e.getSid()+".jpg"));
+				for(@SuppressWarnings("unused")
+				byte c=0; 0<10; c++){
+					tmpstr=RuCaptcha.getDecryption(cid);
+					if(tmpstr.startsWith("OK")){
+						this.c.account().setOnline(act).captchaKey(tmpstr.substring(3)).captchaSid(e.getSid()).execute();
+					}
+					sleep(1000);
+				}
+			}catch (Exception e1) {
+				e1.printStackTrace();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -263,6 +290,15 @@ String tmps="";
 			man.getProfile(id).setNick(nick);
 		}else{
 			man.addProfile(id, new VKUserProfile(nick));
+		}
+	}
+	public void buildHelp(){
+		tmps="help: Эта дичь\nnick: Работа с никами\nping: Ясно из названия\n";
+		for(String s:enabled.keySet()){
+		for(String d1:enabled.get(s).commands.keySet()){
+//			for(String d:enabled.get(s).commands.get(d1).description()){
+				tmps+=s+":"+d1+": "+enabled.get(s).commands.get(d1).description()+"\n";
+			}
 		}
 	}
 }
