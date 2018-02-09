@@ -97,7 +97,7 @@ public class msh extends Thread implements Serializable{
 							if((double)o[i][0]==4){
 		//						System.out.println(tmp[0]+" "+((Double)tmp[3]).intValue()+" "+tmp[5]);
 								if(((String)o[i][5]).startsWith("/")&&((String)o[i][5]).split(" ")[0]!="/"){
-									userCmd(((String)o[i][5]).replaceFirst("/", "").split(" "),((Double)o[i][3]).intValue(),c.messages().getById(act, ((Double)o[i][1]).intValue()).execute().getItems().get(0));
+									userCmd(((String)o[i][5]).replaceFirst("/", ""),((Double)o[i][3]).intValue(),c.messages().getById(act, ((Double)o[i][1]).intValue()).execute().getItems().get(0));
 								}else if(((String)o[i][5]).startsWith("\\")){
 									if(c.messages().getById(act, ((Double)o[i][1]).intValue()).execute().getItems().get(0).getFromId().intValue()==220392464){
 										adminCmd(((String)o[i][5]).replaceFirst("\\", ""), ((Double)o[i][3]).intValue());
@@ -180,16 +180,27 @@ public void adminCmd(String cmd, int peerId) throws Exception{
 	
 	Command tmp;
 	int senderId;
-	public void userCmd(String[] cmd, int peerId, Message message){
+	public void userCmd(String com, int peerId, Message message){
 		try {
-			senderId=message.getUserId().intValue();
+			String[] cmd=com.split(" ");
+			senderId=message.getFromId().intValue();
 			if(cmd[0].contains(":")&&cmd[0].split(":").length==2){
 //				if(senderId==adminId){
 					if(cmd[0].startsWith("admin:")){
 						adminCmd(cmd.toString().replaceFirst("admin:", ""), peerId);
 					}else{
 						if(enabled.get(cmd[0].split(":")[0]).commands.containsKey(cmd[0].split(":")[1])){
-							enabled.get(cmd[0].split(":")[0]).commands.get(cmd[0].split(":")[1]).exec(cmd.toString().replaceFirst(cmd[0]+" ", ""), peerId, message, c, act);
+						if(getVKUserOPLevel(senderId)<enabled.get(cmd[0].split(":")[0]).commands.get(cmd[0].split(":")[1]).OPLevel()){
+							c.messages().send(act).peerId(peerId).message("Ваш уровень доступа мал для использования этой комманды\nВаш уровень: "+getVKUserOPLevel(senderId)+"\nНеобходимый: "+enabled.get(cmd[0].split(":")[0]).commands.get(cmd[0].split(":")[1]).OPLevel()).execute();
+						}else {
+						try{
+//							System.out.println(cmd.toString());
+//							System.out.println(cmd.toString().replaceFirst(cmd[0]+" ", ""));
+							enabled.get(cmd[0].split(":")[0]).commands.get(cmd[0].split(":")[1]).exec(com.replaceFirst(cmd[0]+" ", ""), peerId, message, c, act);
+                        } catch (Exception e) {
+						c.messages().send(act).peerId(peerId).message("Команда \""+cmd[0]+"\" решила плюнуть исключение: "+e.getMessage()).execute();
+                        }
+						}
 						}else{
 							c.messages().send(act).peerId(peerId).message("В модуле \""+cmd[0].split(":")[0]+"\" нет комманды \""+cmd[0].split(":")[1]+"\"").execute();
 						}
@@ -207,17 +218,32 @@ public void adminCmd(String cmd, int peerId) throws Exception{
 						}else{
 							c.messages().send(act).peerId(peerId).message("У вас отсутствует профиль. Вы можете создать выполнив команду \"/nick set (nick)\"").execute();
 						}
-					}else if(cmd[1].equals("set")){
-						if(man.isExist(senderId)){
-							man.getProfile(senderId).setNick(cmd[2]);
-							c.messages().send(act).peerId(peerId).message("Ник установлен").execute();
-						}else{
-							man.addProfile(senderId, new VKUserProfile(cmd[2]));
-							c.messages().send(act).peerId(peerId).message("Профиль создан\nНик установлен").execute();
+					}else if(cmd[1].equals("set")) {
+						if(cmd.length==3){
+							if(man.isExist(senderId)){
+								man.getProfile(senderId).setNick(cmd[2]);
+								c.messages().send(act).peerId(peerId).message("Ник установлен").execute();
+							}else{
+								man.addProfile(senderId, new VKUserProfile(cmd[2]));
+								c.messages().send(act).peerId(peerId).message("Профиль создан\nНик установлен").execute();
+							}
+						}else if(cmd.length==4){
+							if(getVKUserOPLevel(senderId)==127){
+							if(man.isExist(Integer.parseInt(cmd[3]))){
+//								if(man.isExist(Integer.parseInt(cmd[3])){
+								man.getProfile(Integer.parseInt(cmd[3])).setNick(cmd[2]);
+								c.messages().send(act).peerId(peerId).message("Ник установлен").execute();
+							}else{
+								man.addProfile(Integer.parseInt(cmd[3]), new VKUserProfile(cmd[2]));
+								c.messages().send(act).peerId(peerId).message("Профиль создан\nНик установлен").execute();
+							}
+							}else{
+								c.messages().send(act).peerId(peerId).message("К сожалению(или к счастью) у вас недостаточно прав.\nНеобходимый уровень доступа: 127\nВаш уровень доступа: "+getVKUserOPLevel(senderId)).execute();
+							}
 						}
 					}else if(cmd[1].equals("getOPLevel")){
 						if(man.isExist(senderId)){
-							c.messages().send(act).peerId(peerId).message("Ваш уровень оператора: "+man.getProfile(senderId).getOPLevel()+"\nУровень рядового пользователя: -128").execute();
+							c.messages().send(act).peerId(peerId).message("Ваш уровень доступа: "+man.getProfile(senderId).getOPLevel()+"\nУровень рядового пользователя: -128").execute();
 						}else{
 							c.messages().send(act).peerId(peerId).message("У вас отсутствует профиль. Вы можете создать выполнив команду \"/nick set (nick)\"").execute();
 						}
@@ -265,11 +291,13 @@ public void adminCmd(String cmd, int peerId) throws Exception{
 				cid=net.marketer.RuCaptcha.postCaptcha(new File("/tmp/cap/Cap"+e.getSid()+".jpg"));
 				for(@SuppressWarnings("unused")
 				byte c=0; 0<10; c++){
-					tmpstr=RuCaptcha.getDecryption(cid);
-					if(tmpstr.startsWith("OK")){
-						this.c.account().setOnline(act).captchaKey(tmpstr.substring(3)).captchaSid(e.getSid()).execute();
-					}
+					tmpstr=RuCaptcha.getDecryption(cid.substring(3));
+					if(tmpstr.equals(RuCaptcha.Responses.CAPCHA_NOT_READY.toString())){
 					sleep(1000);
+					}else if(tmpstr.startsWith("OK")){
+						this.c.account().setOnline(act).captchaKey(tmpstr.substring(3)).captchaSid(e.getSid()).execute();
+						break;
+					}
 				}
 			}catch (Exception e1) {
 				e1.printStackTrace();

@@ -214,6 +214,9 @@ public class bash extends Thread{
 		try {
 			if(!f.exists()){
 				f.createNewFile();
+			}else{
+				f.delete();
+				f.createNewFile();
 			}
 			new ObjectOutputStream(new FileOutputStream(f)).writeObject(ServiceManager.m);
 		} catch (IOException e) {
