@@ -183,7 +183,7 @@ public void adminCmd(String cmd, int peerId) throws Exception{
 	public void userCmd(String com, int peerId, Message message){
 		try {
 			String[] cmd=com.split(" ");
-			senderId=message.getFromId().intValue();
+			senderId=message.getUserId().intValue();
 			if(cmd[0].contains(":")&&cmd[0].split(":").length==2){
 //				if(senderId==adminId){
 					if(cmd[0].startsWith("admin:")){
