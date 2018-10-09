@@ -13,4 +13,4 @@
 
 
 Если есть желание что-то обсудить, то прошу: https://vk.com/uis9936
-skype:uis246 Discord:uis#5107
+Discord:uis#8276
